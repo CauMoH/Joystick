@@ -1,0 +1,102 @@
+﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Joystick.Views.BluetoothSheetPage"
+             BindingContext="{Binding Source={StaticResource Locator}, Path=BluetoothManagerViewModel}"
+             x:Name="Self"
+             NavigationPage.HasNavigationBar="false">
+
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <StackLayout Grid.Column="0"
+                             Orientation="Horizontal">
+                    <Button Text="Поиск" 
+                            Command="{Binding SearchCommand}"
+                            HorizontalOptions="Start"/>
+                    <Button Text="Назад"
+                            Command="{Binding GoToHomeCommand}"
+                            HorizontalOptions="End"/>
+                </StackLayout>
+
+                <Grid Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0"
+                           Text="{Binding ScanLabel}"
+                           VerticalTextAlignment="Center"
+                           VerticalOptions="Center"
+                           IsVisible="{Binding IsScanning}"/>
+
+                    <Button Grid.Column="1"
+                            IsEnabled="False"
+                            WidthRequest="20"
+                            HeightRequest="20"
+                            CornerRadius="10"
+                            VerticalOptions="Center"
+                            Margin="0,0,5,0"
+                            HorizontalOptions="End">
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}">
+                                <Setter Property="BackgroundColor" Value="Red"/>
+                                <Style.Triggers>
+                                    <DataTrigger TargetType="{x:Type Button}" Binding="{Binding IsAdapterEnabled}" Value="true">
+                                        <Setter Property="BackgroundColor" Value="Green"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    
+                </Grid>
+                
+            </Grid>
+
+            <ListView Grid.Row="1"
+                      ItemsSource="{Binding DevicesList}"
+                      IsPullToRefreshEnabled="true"
+                      SelectionMode="None">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackLayout Grid.Column="0"
+                                             x:Name="ItemStackLayout"
+                                             Orientation="Vertical">
+                                    <Label Text="{Binding DeviceName}"/>
+                                    <Label Text="{Binding Address}"/>
+                                </StackLayout>
+
+                                <Button Grid.Column="1"
+                                        BindingContext="{Binding Source={x:Reference Self}, Path=BindingContext}"
+                                        HorizontalOptions="End"
+                                        Text="Connect" 
+                                        Command="{Binding ConnectCommand}"
+                                        CommandParameter="{Binding Source={x:Reference ItemStackLayout}, Path=BindingContext}"/>
+
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>
