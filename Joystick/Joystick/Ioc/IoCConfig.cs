@@ -26,6 +26,7 @@ namespace Joystick.Ioc
         public void RegisterViewModels()
         {
             SimpleIoc.Default.Register<IBluetoothManagerViewModel, BluetoothManagerViewModel>();
+            SimpleIoc.Default.Register<ISettingsViewModel, SettingsViewModel>();
             SimpleIoc.Default.Register<MainPageViewModel>();
         }
     }

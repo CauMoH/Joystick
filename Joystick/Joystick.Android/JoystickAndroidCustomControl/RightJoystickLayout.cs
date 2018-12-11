@@ -25,17 +25,15 @@ namespace Joystick.Droid.JoystickAndroidCustomControl
             SetContent(context);
         }
 
-        private readonly int _resolution = 255;
-
         private LinearLayout _rightJoyStick;
-        private Action<int> _updateValue;
+        private Action<Tuple<int, int>> _updateValue;
 
         private float _xInView;
 
         private float _originalX;
         private float _originalY;
 
-        public int Xposition { get; private set; }
+        public Tuple<int, int> RawXposition { get; private set; }
 
         private void SetContent(Context context)
         {
@@ -94,12 +92,13 @@ namespace Joystick.Droid.JoystickAndroidCustomControl
         private void UpdateX(int x)
         {
             var totalAxisLength = (int)_originalX * 2;
-            Xposition = x * _resolution / totalAxisLength - _resolution / 2;
 
-            _updateValue?.Invoke(Xposition);
+            RawXposition = new Tuple<int, int>(x, totalAxisLength);
+
+            _updateValue?.Invoke(RawXposition);
         }
 
-        public void AddTouchListener(Action<int> updateValue)
+        public void AddTouchListener(Action<Tuple<int, int>> updateValue)
         {
             _rightJoyStick.SetOnTouchListener(this);
             _updateValue = updateValue;

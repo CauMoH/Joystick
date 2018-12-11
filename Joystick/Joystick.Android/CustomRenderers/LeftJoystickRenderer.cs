@@ -37,7 +37,7 @@ namespace Joystick.Droid.CustomRenderers
             {
                 _leftJoystickLayout.AddTouchListener(yposition =>
                 {
-                    Element.Yposition = yposition;
+                    Element.RawYposition = yposition;
                 });
             }
         }

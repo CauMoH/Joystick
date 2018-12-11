@@ -16,5 +16,10 @@ namespace Joystick.Navigation
         {
             await Application.Current.MainPage.Navigation.PushAsync(new BluetoothSheetPage(), true);
         }
+
+        public async Task NavigateToSettings()
+        {
+            await Application.Current.MainPage.Navigation.PushAsync(new SettingsSheetPage(), true);
+        }
     }
 }

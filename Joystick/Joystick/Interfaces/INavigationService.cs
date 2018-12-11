@@ -7,5 +7,7 @@ namespace Joystick.Interfaces
         Task NavigateToHome();
 
         Task NavigateToBluetooth();
+
+        Task NavigateToSettings();
     }
 }

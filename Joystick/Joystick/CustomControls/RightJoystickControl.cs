@@ -1,21 +1,22 @@
-﻿using Xamarin.Forms;
+﻿using System;
+using Xamarin.Forms;
 
 namespace Joystick.CustomControls
 {
     public class RightJoystickControl : View
     {
-        public static readonly BindableProperty XpositionProperty =
+        public static readonly BindableProperty RawXpositionProperty =
             BindableProperty.Create(
-                propertyName: nameof(Xposition),
-                returnType: typeof(int),
-                declaringType: typeof(int),
-                defaultValue: 0
+                nameof(RawXposition),
+                typeof(Tuple<int, int>),
+                declaringType: typeof(Tuple<int, int>),
+                defaultValue: new Tuple<int, int>(0, 0)
             );
 
-        public int Xposition
+        public Tuple<int, int> RawXposition
         {
-            get => (int)GetValue(XpositionProperty);
-            set => SetValue(XpositionProperty, value);
+            get => (Tuple<int, int>)GetValue(RawXpositionProperty);
+            set => SetValue(RawXpositionProperty, value);
         }
     }
 }

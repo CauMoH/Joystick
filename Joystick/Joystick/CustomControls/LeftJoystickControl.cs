@@ -1,21 +1,22 @@
-﻿using Xamarin.Forms;
+﻿using System;
+using Xamarin.Forms;
 
 namespace Joystick.CustomControls
 {
     public class LeftJoystickControl : View
     {
-        public static readonly BindableProperty YpositionProperty =
+        public static readonly BindableProperty RawYpositionProperty =
             BindableProperty.Create(
-                propertyName: nameof(Yposition),
-                returnType: typeof(int),
-                declaringType: typeof(int),
-                defaultValue: 0
+                nameof(RawYposition),
+                typeof(Tuple<int, int>),
+                typeof(Tuple<int, int>),
+                new Tuple<int, int>(0, 0)
             );
 
-        public int Yposition
+        public Tuple<int, int> RawYposition
         {
-            get => (int)GetValue(YpositionProperty);
-            set => SetValue(YpositionProperty, value);
+            get => (Tuple<int, int>)GetValue(RawYpositionProperty);
+            set => SetValue(RawYpositionProperty, value);
         }
 
     }

@@ -16,6 +16,7 @@ namespace Joystick.ViewModels
 
         public MainPageViewModel MainPageViewModel => ServiceLocator.Current.GetInstance<MainPageViewModel>();
         public IBluetoothManagerViewModel BluetoothManagerViewModel => ServiceLocator.Current.GetInstance<IBluetoothManagerViewModel>();
+        public ISettingsViewModel SettingsViewModel => ServiceLocator.Current.GetInstance<ISettingsViewModel>();
 
         #endregion
 

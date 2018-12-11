@@ -20,11 +20,13 @@
 
             <customControls:LeftJoystickControl x:Name="LeftJoystickControl"
                                                 Grid.Column="0" 
+                                                RawYposition = "{Binding JoystickRawYposition, Mode=OneWayToSource}"
                                                 HorizontalOptions="Start"
                                                 BackgroundColor="Transparent"/>
 
             <customControls:RightJoystickControl x:Name="RightJoystickControl"
                                                  Grid.Column="1" 
+                                                 RawXposition = "{Binding JoystickRawXposition, Mode=OneWayToSource}"
                                                  HorizontalOptions="Start"
                                                  BackgroundColor="Transparent"/>
 
@@ -35,28 +37,31 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
             <StackLayout Grid.Column="0"
-                         Orientation="Vertical"
-                         BindingContext="{x:Reference Name=RightJoystickControl}">
+                         Orientation="Vertical">
                 <Label Text="Xposition"/>
-                <Label Text="{Binding Xposition}"/>
+                <Label Text="{Binding JoystickXposition}"/>
             </StackLayout>
 
             <StackLayout Grid.Column="1"
-                         Orientation="Vertical"
-                         BindingContext="{x:Reference Name=LeftJoystickControl}">
+                         Orientation="Vertical">
                 <Label Text="Yposition"/>
-                <Label Text="{Binding Yposition}"/>
+                <Label Text="{Binding JoystickYposition}"/>
             </StackLayout>
 
             <Button Grid.Column="2"
                     Text="Bluetooth"
                     Command="{Binding GoToBluetoothCommand}"/>
 
-            <Grid Grid.Column="3">
+            <Button Grid.Column="3"
+                    Text="Settings"
+                    Command="{Binding GoToSettingsCommand}"/>
+
+            <Grid Grid.Column="4">
                 <Label VerticalTextAlignment="Center"
                        VerticalOptions="Center"
                        Text="{Binding Connection}"/>
