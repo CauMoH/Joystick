@@ -19,6 +19,8 @@ namespace Joystick.Interfaces
 
         ObservableCollection<BlePeripheralViewModel> DevicesList { get; }
 
+        ObservableCollection<BleGattServiceViewModel> Services { get; }
+
         string Connection { get; }
 
         ConnectionProgress ConnectionProgress { get; }

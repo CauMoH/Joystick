@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Timers;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
+using Joystick.Data;
 using Joystick.Interfaces;
+using Joystick.Utils;
+using nexus.protocols.ble;
 using Xamarin.Forms;
 
 namespace Joystick.ViewModels
@@ -17,6 +21,11 @@ namespace Joystick.ViewModels
         private string _title;
         private Tuple<int, int> _joystickRawXposition;
         private Tuple<int, int> _joystickRawYposition;
+        private bool _isEnableLights;
+
+        private const int UpdateValuesInMs = 200;
+
+        private readonly Timer _timer = new Timer(UpdateValuesInMs);
 
         #endregion
 
@@ -52,6 +61,12 @@ namespace Joystick.ViewModels
                 Set(ref _joystickRawYposition, value);
                 RaisePropertyChanged(nameof(JoystickYposition));
             }
+        }
+
+        public bool IsEnableLights
+        {
+            get => _isEnableLights;
+            set => Set(ref _isEnableLights, value);
         }
 
         public int JoystickXposition
@@ -131,13 +146,55 @@ namespace Joystick.ViewModels
             _bluetoothManager.PropChanged += BluetoothManager_OnPropChanged;
 
             InitCommands();
-        }
 
+            _timer.Elapsed += UpdaterTimer_OnElapsed;
+        }
+        
         #region Event Handlers
 
         private void BluetoothManager_OnPropChanged(object sender, EventArgs eventArgs)
         {
             RaisePropertyChanged(nameof(Connection));
+        }
+
+        private void UpdaterTimer_OnElapsed(object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                if (_bluetoothManager.IsBusy || _bluetoothManager.ConnectionProgress != ConnectionProgress.Connected)
+                {
+                    return;
+                }
+
+                if (_bluetoothManager.Services.Count == 0 || _bluetoothManager.Services[0].Characteristic.Count == 0)
+                {
+                    return;
+                }
+
+                var characteristic = _bluetoothManager.Services[0].Characteristic[0];
+
+                if (!characteristic.CanWrite)
+                {
+                    return;
+                }
+
+                var data = new DataResponse
+                {
+                    XPosition = JoystickXposition,
+                    YPosition = JoystickYposition,
+                    IsEnableLights = IsEnableLights
+                };
+
+                var bytes = Serializer.SerializeValuesResponse(data);
+
+                characteristic.WriteValue = bytes;
+                characteristic.WriteBytesCommand.Execute(null);
+
+            }
+            catch
+            {
+                
+            }
         }
 
         #endregion

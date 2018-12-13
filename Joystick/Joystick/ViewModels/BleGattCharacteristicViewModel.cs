@@ -27,7 +27,7 @@ namespace Joystick.ViewModels
         private CharacteristicProperty _mProps;
         private string _mValueAsHex;
         private string _mValueAsString;
-        private string _mWriteValue;
+        private byte[] _mWriteValue;
 
         #endregion
 
@@ -95,7 +95,7 @@ namespace Joystick.ViewModels
             private set => Set(ref _mValueAsString, value);
         }
 
-        public string WriteValue
+        public byte[] WriteValue
         {
             get => _mWriteValue;
             set => Set(ref _mWriteValue, value);
@@ -234,16 +234,12 @@ namespace Joystick.ViewModels
 
         private async Task WriteCurrentBytesExecute()
         {
-            var w = _mWriteValue;
-            if (!w.IsNullOrEmpty())
+            if (_mWriteValue.Length != 0)
             {
-                var val = w.DecodeAsBase16();
                 try
                 {
                     IsBusy = true;
-                    var writeTask = _mGattServer.WriteCharacteristicValue(_mServiceGuid, _mCharacteristicGuid, val);
-                    // notify UI to clear written value from input field
-                    WriteValue = "";
+                    var writeTask = _mGattServer.WriteCharacteristicValue(_mServiceGuid, _mCharacteristicGuid, _mWriteValue);
                     // update the characteristic value with the awaited results of the write
                     UpdateDisplayedValue(await writeTask);
                 }
