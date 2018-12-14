@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using Joystick.Interfaces;
 using Xamarin.Forms;
@@ -98,10 +99,13 @@ namespace Joystick.ViewModels
             _userSettings.CenterX = CenterX;
             _userSettings.MinEngineStart = MinEngineStart;
 
+            PropChanged?.Invoke(this, EventArgs.Empty);
+
             await _navigationService.NavigateToHome();
         }
 
         #endregion
 
+        public event EventHandler<EventArgs> PropChanged;
     }
 }

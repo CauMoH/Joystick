@@ -30,7 +30,7 @@ namespace Joystick.Interfaces
         bool IsConnectedOrConnecting { get; }
 
 
-        void ConnectToDevice(string deviceAddr);
+        void ConnectToLastDevice();
 
         Task Disconnect();
 

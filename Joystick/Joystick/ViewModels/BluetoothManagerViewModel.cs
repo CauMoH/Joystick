@@ -81,11 +81,12 @@ namespace Joystick.ViewModels
                 {
                     _mIsBusy = value;
                     RaisePropertyChanged(nameof(IsConnectedOrConnecting));
+                    PropChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
 
-        public bool IsConnectedOrConnecting => _mIsBusy || _connection != ConnectionState.Disconnected.ToString();
+        public bool IsConnectedOrConnecting => _mIsBusy || _connectionProgress != ConnectionProgress.Disconnected;
 
         public ObservableCollection<BleGattServiceViewModel> Services { get; } = new ObservableCollection<BleGattServiceViewModel>();
 
@@ -110,6 +111,7 @@ namespace Joystick.ViewModels
             _bluetoothService.Adapter.CurrentState.Subscribe(state =>
             {
                 RaisePropertyChanged(nameof(IsAdapterEnabled));
+                PropChanged?.Invoke(this ,EventArgs.Empty);
             });
 
             if (!IsAdapterEnabled)
@@ -131,6 +133,7 @@ namespace Joystick.ViewModels
             }
 
             RaisePropertyChanged(nameof(IsAdapterEnabled));
+            PropChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void StopScan()
@@ -138,103 +141,12 @@ namespace Joystick.ViewModels
             MScanCancel?.Cancel();
         }
 
-        public void ConnectToDevice(string deviceAddr)
+        public void ConnectToLastDevice()
         {
-
+            Connect(Guid.Parse(_userSettings.LastBluetoothAddr));
         }
 
-        public async Task Disconnect()
-        {
-            IsBusy = true;
-            if (_mGattServer != null)
-            {
-                await _mGattServer.Disconnect();
-                _mGattServer = null;
-            }
-
-            Services.Clear();
-            IsBusy = false;
-        }
-
-        #region Commands
-
-        private void InitCommands()
-        {
-            GoToHomeCommand = new Command(GoToHomeExecute);
-            SearchCommand = new Command(SearchExecute);
-            ConnectCommand = new Command<BlePeripheralViewModel>(ConnectExecute);
-        }
-
-        #region Props
-
-        public ICommand GoToHomeCommand { get; private set; }
-
-        public ICommand SearchCommand { get; private set; }
-
-        public ICommand ConnectCommand { get; private set; }
-        
-        #endregion
-
-        private async void GoToHomeExecute()
-        {
-            DevicesList.Clear();
-            StopScan();
-            await _navigationService.NavigateToHome();
-        }
-
-        private async void SearchExecute()
-        {
-            if (IsScanning)
-            {
-                return;
-            }
-
-            if (!IsAdapterEnabled)
-            {
-                _customDisplayAlert.DisplayAlert("Ошибка", "Cannot start scan, Bluetooth is turned off");
-                return;
-            }
-
-            StopScan();
-            IsScanning = true;
-            var seconds = AppUtils.ClampSeconds(AppUtils.SCAN_SECONDS_MAX);
-            MScanCancel = new CancellationTokenSource(TimeSpan.FromSeconds(seconds));
-            _mScanStopTime = DateTime.UtcNow.AddSeconds(seconds);
-
-            RaisePropertyChanged(nameof(ScanTimeRemaining));
-            RaisePropertyChanged(nameof(ScanLabel));
-            Device.StartTimer(
-               TimeSpan.FromSeconds(1),
-               () =>
-               {
-                   RaisePropertyChanged(nameof(ScanTimeRemaining));
-                   RaisePropertyChanged(nameof(ScanLabel));
-                   return IsScanning;
-               });
-           
-            await _bluetoothService.Adapter.ScanForBroadcasts(
-                peripheral =>
-                {
-                    Device.BeginInvokeOnMainThread(
-                        () =>
-                        {
-                            var existing = DevicesList.FirstOrDefault(d => d.Equals(peripheral));
-                            if (existing != null)
-                            {
-                                existing.Update(peripheral);
-                            }
-                            else
-                            {
-                                DevicesList.Add(new BlePeripheralViewModel(peripheral));
-                            }
-                        });
-                },
-               MScanCancel.Token);
-
-            IsScanning = false;
-        }
-
-        private async void ConnectExecute(BlePeripheralViewModel device)
+        private async void Connect(object device)
         {
             try
             {
@@ -248,27 +160,44 @@ namespace Joystick.ViewModels
                 await Disconnect();
                 IsBusy = true;
 
-                _connectedDevice = device;
+                BlePeripheralConnectionRequest connection;
 
-                var connection = await _bluetoothService.Adapter.ConnectToDevice(
-                   device: _connectedDevice.Model,
-                   timeout: TimeSpan.FromSeconds(AppUtils.CONNECTION_TIMEOUT_SECONDS),
-                   progress: progress => { ConnectionProgress = progress; });
+                if (device is BlePeripheralViewModel model)
+                {
+                    _connectedDevice = model;
+
+                    connection = await _bluetoothService.Adapter.ConnectToDevice(
+                        _connectedDevice.Model,
+                        TimeSpan.FromSeconds(AppUtils.CONNECTION_TIMEOUT_SECONDS),
+                        progress => { ConnectionProgress = progress; });
+                }
+                else
+                {
+                    var deviceGuid = device is Guid guid ? guid : new Guid();
+
+                    connection = await _bluetoothService.Adapter.ConnectToDevice(
+                        deviceGuid,
+                        TimeSpan.FromSeconds(AppUtils.CONNECTION_TIMEOUT_SECONDS),
+                        progress => { ConnectionProgress = progress; });
+                }
+               
                 if (connection.IsSuccessful())
                 {
                     _mGattServer = connection.GattServer;
 
-                    _mGattServer.Subscribe(
-                       async c =>
-                       {
-                           if (c == ConnectionState.Disconnected)
-                           {
-                               _customDisplayAlert.DisplayAlert("Info", "Device disconnected");
-                               await Disconnect();
-                           }
+                    _userSettings.LastBluetoothAddr = _mGattServer.DeviceId.ToString();
 
-                           Connection = c.ToString();
-                       });
+                    _mGattServer.Subscribe(
+                        async c =>
+                        {
+                            if (c == ConnectionState.Disconnected)
+                            {
+                                _customDisplayAlert.DisplayAlert("Info", "Device disconnected");
+                                await Disconnect();
+                            }
+
+                            Connection = c.ToString();
+                        });
 
                     Connection = "Reading Services";
 
@@ -315,13 +244,112 @@ namespace Joystick.ViewModels
                 }
 
                 IsBusy = false;
-                
+
             }
             catch (Exception ex)
             {
                 IsBusy = false;
                 _customDisplayAlert.DisplayAlert("Ошибка", ex.Message);
             }
+        }
+
+        public async Task Disconnect()
+        {
+            IsBusy = true;
+            if (_mGattServer != null)
+            {
+                await _mGattServer.Disconnect();
+                _mGattServer = null;
+            }
+
+            Services.Clear();
+            IsBusy = false;
+        }
+
+        #region Commands
+
+        private void InitCommands()
+        {
+            GoToHomeCommand = new Command(GoToHomeExecute);
+            SearchCommand = new Command(SearchExecute);
+            ConnectCommand = new Command<BlePeripheralViewModel>(ConnectExecute);
+        }
+
+        #region Props
+
+        public ICommand GoToHomeCommand { get; private set; }
+
+        public ICommand SearchCommand { get; private set; }
+
+        public ICommand ConnectCommand { get; private set; }
+        
+        #endregion
+
+        private async void GoToHomeExecute()
+        {
+            DevicesList.Clear();
+            StopScan();
+            IsBusy = false;
+            await _navigationService.NavigateToHome();
+        }
+
+        private async void SearchExecute()
+        {
+            if (IsScanning)
+            {
+                return;
+            }
+
+            if (!IsAdapterEnabled)
+            {
+                _customDisplayAlert.DisplayAlert("Ошибка", "Cannot start scan, Bluetooth is turned off");
+                return;
+            }
+
+            StopScan();
+            IsScanning = true;
+            var seconds = AppUtils.ClampSeconds(AppUtils.SCAN_SECONDS_MAX);
+            MScanCancel = new CancellationTokenSource(TimeSpan.FromSeconds(seconds));
+            _mScanStopTime = DateTime.UtcNow.AddSeconds(seconds);
+
+            RaisePropertyChanged(nameof(ScanTimeRemaining));
+            RaisePropertyChanged(nameof(ScanLabel));
+            PropChanged?.Invoke(this, EventArgs.Empty);
+            Device.StartTimer(
+               TimeSpan.FromSeconds(1),
+               () =>
+               {
+                   RaisePropertyChanged(nameof(ScanTimeRemaining));
+                   RaisePropertyChanged(nameof(ScanLabel));
+                   PropChanged?.Invoke(this, EventArgs.Empty);
+                   return IsScanning;
+               });
+           
+            await _bluetoothService.Adapter.ScanForBroadcasts(
+                peripheral =>
+                {
+                    Device.BeginInvokeOnMainThread(
+                        () =>
+                        {
+                            var existing = DevicesList.FirstOrDefault(d => d.Equals(peripheral));
+                            if (existing != null)
+                            {
+                                existing.Update(peripheral);
+                            }
+                            else
+                            {
+                                DevicesList.Add(new BlePeripheralViewModel(peripheral));
+                            }
+                        });
+                },
+               MScanCancel.Token);
+
+            IsScanning = false;
+        }
+
+        private void ConnectExecute(BlePeripheralViewModel device)
+        {
+            Connect(device);
         }
 
         private async Task Update(BlePeripheralViewModel peripheral)

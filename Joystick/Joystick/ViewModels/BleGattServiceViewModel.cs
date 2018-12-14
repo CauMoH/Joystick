@@ -12,7 +12,6 @@ namespace Joystick.ViewModels
 {
     public class BleGattServiceViewModel : ViewModelBase
     {
-
         #region Members
 
         private readonly IBleGattServerConnection _mGattServer;
@@ -47,9 +46,11 @@ namespace Joystick.ViewModels
             _mServiceGuid = service;
             _customDisplayAlert = customDisplayAlert;
             _mGattServer = gattServer;
+
+            OnAppearing();
         }
         
-        public async void OnAppearing()
+        public  async void OnAppearing()
         {
             if (IsBusy || Characteristic.Count >= 1)
             {
