@@ -9,7 +9,8 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Button Grid.Row="0"
@@ -80,6 +81,12 @@
                        Text="{Binding MinEngineStart, Mode=TwoWay}"/>
 
             </Grid>
+
+            <StackLayout Grid.Row="2"
+                         Orientation="Vertical">
+                <Label Text="Интервал передачи данных"/>
+                <Entry Text="{Binding UpdateTime, Mode=TwoWay}"/>
+            </StackLayout>
 
         </Grid>
     </ContentPage.Content>

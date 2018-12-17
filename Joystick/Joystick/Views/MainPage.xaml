@@ -1,6 +1,7 @@
 ﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:customControls="clr-namespace:Joystick.CustomControls"
+             xmlns:effects="clr-namespace:Xamarin.Toolkit.Effects;assembly=Xamarin.Toolkit.Effects"
              x:Class="Joystick.Views.MainPage"
              BindingContext="{Binding Source={StaticResource Locator}, Path=MainPageViewModel}"
              NavigationPage.HasNavigationBar="false">
@@ -37,35 +38,76 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
             <StackLayout Grid.Column="0"
-                         Orientation="Vertical">
-                <Label Text="Xposition"/>
-                <Label Text="{Binding JoystickXposition}"/>
+                         Orientation="Vertical"
+                         WidthRequest="50">
+                <Label Text="X" 
+                       HorizontalOptions="Center"/>
+                <Label Text="{Binding JoystickXposition}"
+                       HorizontalOptions="Center"/>
             </StackLayout>
 
             <StackLayout Grid.Column="1"
-                         Orientation="Vertical">
-                <Label Text="Yposition"/>
-                <Label Text="{Binding JoystickYposition}"/>
+                         Orientation="Vertical"
+                         WidthRequest="50">
+                <Label Text="Y"
+                       HorizontalOptions="Center"/>
+                <Label Text="{Binding JoystickYposition}"
+                       HorizontalOptions="Center"/>
+            </StackLayout>
+            
+            <StackLayout Orientation="Horizontal"
+                         VerticalOptions="Center"
+                         Grid.Column="2">
+                <Label Text="Свет"
+                       VerticalOptions="Center"
+                       VerticalTextAlignment="Center"/>
+                <Switch IsToggled="{Binding IsEnableLights}"
+                        OnColor="AliceBlue"
+                        effects:SwitchChangeColor.FalseColor="#ff2b2b"
+                        effects:SwitchChangeColor.TrueColor="#00db07"/>
             </StackLayout>
 
-            <Button Grid.Column="2"
+            <Grid Grid.Column="3">
+                <Label VerticalTextAlignment="Center"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End"
+                       Text="{Binding Connection}"/>
+            </Grid>
+
+            <Button Grid.Column="4"
+                    IsEnabled="False"
+                    WidthRequest="20"
+                    HeightRequest="20"
+                    CornerRadius="10"
+                    VerticalOptions="Center"
+                    Margin="5,0,5,0"
+                    HorizontalOptions="End">
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="BackgroundColor" Value="Red"/>
+                        <Style.Triggers>
+                            <DataTrigger TargetType="{x:Type Button}" Binding="{Binding IsConnected}" Value="true">
+                                <Setter Property="BackgroundColor" Value="Green"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Button Grid.Column="5"
                     Text="Bluetooth"
                     Command="{Binding GoToBluetoothCommand}"/>
 
-            <Button Grid.Column="3"
-                    Text="Settings"
+            <Button Grid.Column="6"
+                    Text="НАСТРОЙКИ"
                     Command="{Binding GoToSettingsCommand}"/>
-
-            <Grid Grid.Column="4">
-                <Label VerticalTextAlignment="Center"
-                       VerticalOptions="Center"
-                       Text="{Binding Connection}"/>
-            </Grid>
 
         </Grid>
 

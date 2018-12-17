@@ -92,9 +92,7 @@
     <AndroidResource Include="Resources\values\styles.xml" />
     <AndroidResource Include="Resources\values\colors.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Helpers\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\Joystick\Joystick.csproj">
       <Project>{97AED12D-2A5A-4FB0-A946-677E1053F128}</Project>

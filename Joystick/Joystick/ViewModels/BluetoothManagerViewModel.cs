@@ -33,7 +33,7 @@ namespace Joystick.ViewModels
         private IBleGattServerConnection _mGattServer;
         private string _connection = string.Empty;
 
-        private ConnectionProgress _connectionProgress;
+        private ConnectionProgress _connectionProgress = ConnectionProgress.Disconnected;
 
         private bool _mIsBusy;
 
@@ -69,7 +69,11 @@ namespace Joystick.ViewModels
         public ConnectionProgress ConnectionProgress
         {
             get => _connectionProgress;
-            set => Set(ref _connectionProgress, value);
+            set
+            {
+                Set(ref _connectionProgress, value);
+                PropChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public bool IsBusy
@@ -228,6 +232,8 @@ namespace Joystick.ViewModels
                 }
                 else
                 {
+                    ConnectionProgress = ConnectionProgress.Disconnected;
+
                     string errorMsg;
                     if (connection.ConnectionResult == ConnectionResult.ConnectionAttemptCancelled)
                     {
@@ -248,6 +254,7 @@ namespace Joystick.ViewModels
             }
             catch (Exception ex)
             {
+                ConnectionProgress = ConnectionProgress.Disconnected;
                 IsBusy = false;
                 _customDisplayAlert.DisplayAlert("Ошибка", ex.Message);
             }

@@ -1,6 +1,5 @@
 ﻿using System;
 using CommonServiceLocator;
-using GalaSoft.MvvmLight;
 using Joystick.Interfaces;
 using Joystick.Services;
 using nexus.protocols.ble;
@@ -20,19 +19,20 @@ namespace Joystick
 
             MainPage = new NavigationPage(new Views.MainPage());
 
-            MessagingCenter.Subscribe<CustomDisplayAlert, string[]>(this, "DisplayAlert", (sender, values) => {
+            MessagingCenter.Subscribe<CustomDisplayAlert, string[]>(this, "DisplayAlert", (sender, values) =>
+            {
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     MainPage.DisplayAlert(values[0], values[1], "Ok");
                 });
             });
-            
+
             CheckPermission(Permission.Location);
             CheckPermission(Permission.LocationAlways);
             CheckPermission(Permission.LocationWhenInUse);
             CheckPermission(Permission.Storage);
         }
-        
+
         private async void CheckPermission(Permission permission)
         {
             try

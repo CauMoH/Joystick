@@ -13,53 +13,60 @@ namespace Joystick.ViewModels
         private readonly IUserSettings _userSettings;
         private readonly INavigationService _navigationService;
 
-        private int _maxX;
-        private int _minX;
-        private int _maxY;
-        private int _minY;
-        private int _centerX;
-        private int _minEngineStart;
+        private short _maxX;
+        private short _minX;
+        private short _maxY;
+        private short _minY;
+        private short _centerX;
+        private short _minEngineStart;
+        private short _updateTime;
 
         #endregion
 
         #region Props
 
-        public int MaxX
+        public short MaxX
         {
             get => _maxX;
             set => Set(ref _maxX, value);
         }
         
-        public int MinX
+        public short MinX
         {
             get => _minX;
             set => Set(ref _minX, value);
         }
 
-        public int MaxY
+        public short MaxY
         {
             get => _maxY;
             set => Set(ref _maxY, value);
         }
 
-        public int MinY
+        public short MinY
         {
             get => _minY;
             set => Set(ref _minY, value);
         }
 
-        public int CenterX
+        public short CenterX
         {
             get => _centerX;
             set => Set(ref _centerX, value);
         }
 
-        public int MinEngineStart
+        public short MinEngineStart
         {
             get => _minEngineStart;
             set => Set(ref _minEngineStart, value);
         }
-        
+
+        public short UpdateTime
+        {
+            get => _updateTime;
+            set => Set(ref _updateTime, value);
+        }
+
         #endregion
 
         public SettingsViewModel(IUserSettings settings, INavigationService navigationService)
@@ -79,6 +86,7 @@ namespace Joystick.ViewModels
             MinY = _userSettings.MinY;
             CenterX = _userSettings.CenterX;
             MinEngineStart = _userSettings.MinEngineStart;
+            UpdateTime = _userSettings.UpdateInMs;
         }
 
         #region Commands
@@ -98,6 +106,7 @@ namespace Joystick.ViewModels
             _userSettings.MinY = MinY;
             _userSettings.CenterX = CenterX;
             _userSettings.MinEngineStart = MinEngineStart;
+            _userSettings.UpdateInMs = UpdateTime;
 
             PropChanged?.Invoke(this, EventArgs.Empty);
 

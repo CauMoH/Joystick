@@ -15,41 +15,52 @@ namespace Joystick.Configuration
             set => AppSettings.AddOrUpdateValue(nameof(LastBluetoothAddr), value);
         }
 
-        public int MaxX
+        public short MaxX
         {
-            get => AppSettings.GetValueOrDefault(nameof(MaxX), 30);
+            get => (short)AppSettings.GetValueOrDefault(nameof(MaxX), 30);
             set => AppSettings.AddOrUpdateValue(nameof(MaxX), value);
         }
 
-        public int MinX
+        public short MinX
         {
-            get => AppSettings.GetValueOrDefault(nameof(MinX), 30);
+            get => (short)AppSettings.GetValueOrDefault(nameof(MinX), 30);
             set => AppSettings.AddOrUpdateValue(nameof(MinX), value);
         }
 
-        public int MaxY
+        public short MaxY
         {
-            get => AppSettings.GetValueOrDefault(nameof(MaxY), 200);
+            get => (short)AppSettings.GetValueOrDefault(nameof(MaxY), 200);
             set => AppSettings.AddOrUpdateValue(nameof(MaxY), value);
         }
 
-        public int MinY
+        public short MinY
         {
-            get => AppSettings.GetValueOrDefault(nameof(MinY), 200);
+            get => (short)AppSettings.GetValueOrDefault(nameof(MinY), 200);
             set => AppSettings.AddOrUpdateValue(nameof(MinY), value);
         }
 
-        public int CenterX
+        public short CenterX
         {
-            get => AppSettings.GetValueOrDefault(nameof(CenterX), 0);
+            get => (short)AppSettings.GetValueOrDefault(nameof(CenterX), 0);
             set => AppSettings.AddOrUpdateValue(nameof(CenterX), value);
         }
 
-        public int MinEngineStart
+        public short MinEngineStart
         {
-            get => AppSettings.GetValueOrDefault(nameof(MinEngineStart), 40);
+            get => (short)AppSettings.GetValueOrDefault(nameof(MinEngineStart), 40);
             set => AppSettings.AddOrUpdateValue(nameof(MinEngineStart), value);
         }
 
+        public bool IsEnableLights
+        {
+            get => AppSettings.GetValueOrDefault(nameof(IsEnableLights), false);
+            set => AppSettings.AddOrUpdateValue(nameof(IsEnableLights), value);
+        }
+
+        public short UpdateInMs
+        {
+            get => (short)AppSettings.GetValueOrDefault(nameof(UpdateInMs), 200);
+            set => AppSettings.AddOrUpdateValue(nameof(UpdateInMs), value);
+        }
     }
 }

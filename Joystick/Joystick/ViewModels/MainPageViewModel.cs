@@ -22,13 +22,10 @@ namespace Joystick.ViewModels
         private string _title;
         private Tuple<int, int> _joystickRawXposition;
         private Tuple<int, int> _joystickRawYposition;
-        private int _joystickXposition;
-        private int _joystickYposition;
-        private bool _isEnableLights;
+        private short _joystickXposition;
+        private short _joystickYposition;
 
-        private const int UpdateValuesInMs = 200;
-
-        private readonly Timer _timer = new Timer(UpdateValuesInMs);
+        private readonly Timer _timer = new Timer();
 
         private bool _isFirstConnectToLastDevice;
 
@@ -73,23 +70,29 @@ namespace Joystick.ViewModels
 
         public bool IsEnableLights
         {
-            get => _isEnableLights;
-            set => Set(ref _isEnableLights, value);
+            get => _userSettings.IsEnableLights;
+            set
+            {
+                _userSettings.IsEnableLights = value;
+                RaisePropertyChanged(nameof(IsEnableLights));
+            }
         }
 
-        public int JoystickXposition
+        public short JoystickXposition
         {
             get => _joystickXposition;
             set => Set(ref _joystickXposition, value);
         }
 
-        public int JoystickYposition
+        public short JoystickYposition
         {
             get => _joystickYposition;
             set => Set(ref _joystickYposition, value);
         }
 
         public string Connection => _bluetoothManager.Connection;
+
+        public bool IsConnected => _bluetoothManager.ConnectionProgress == ConnectionProgress.Connected;
 
         #endregion
 
@@ -108,6 +111,7 @@ namespace Joystick.ViewModels
 
             InitCommands();
 
+            _timer.Interval = _userSettings.UpdateInMs;
             _timer.Elapsed += UpdaterTimer_OnElapsed;
             _timer.Start();
 
@@ -148,7 +152,7 @@ namespace Joystick.ViewModels
                 result = (_joystickRawXposition.Item1 * resolution / _joystickRawXposition.Item2 - resolution / 2) * 2 + _settingsViewModel.CenterX;
             }
 
-            JoystickXposition = result;
+            JoystickXposition = (short)result;
         }
 
         private void UpdateYPosition()
@@ -179,7 +183,7 @@ namespace Joystick.ViewModels
                 result = ((_joystickRawYposition.Item1 * resolution / _joystickRawYposition.Item2 - resolution / 2) * 2 + _settingsViewModel.MinEngineStart) * -1;
             }
 
-            JoystickYposition = result;
+            JoystickYposition = (short)result;
         }
         
         #region Event Handlers
@@ -187,11 +191,13 @@ namespace Joystick.ViewModels
         private void BluetoothManager_OnPropChanged(object sender, EventArgs eventArgs)
         {
             RaisePropertyChanged(nameof(Connection));
+            RaisePropertyChanged(nameof(IsConnected));
         }
 
         private void SettingsViewModel_OnPropChanged(object sender, EventArgs e)
         {
             Init();
+            _timer.Interval = _settingsViewModel.UpdateTime;
         }
 
         private void UpdaterTimer_OnElapsed(object sender, ElapsedEventArgs e)
@@ -242,7 +248,7 @@ namespace Joystick.ViewModels
             }
             catch
             {
-                
+                // ignored
             }
         }
 
