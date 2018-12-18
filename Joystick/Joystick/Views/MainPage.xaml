@@ -74,12 +74,7 @@
                         effects:SwitchChangeColor.TrueColor="#00db07"/>
             </StackLayout>
 
-            <Grid Grid.Column="3">
-                <Label VerticalTextAlignment="Center"
-                       VerticalOptions="Center"
-                       HorizontalOptions="End"
-                       Text="{Binding Connection}"/>
-            </Grid>
+           
 
             <Button Grid.Column="4"
                     IsEnabled="False"

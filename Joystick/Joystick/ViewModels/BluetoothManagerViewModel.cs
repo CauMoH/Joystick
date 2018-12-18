@@ -187,6 +187,7 @@ namespace Joystick.ViewModels
                
                 if (connection.IsSuccessful())
                 {
+                    ConnectionProgress = ConnectionProgress.Connected;
                     _mGattServer = connection.GattServer;
 
                     _userSettings.LastBluetoothAddr = _mGattServer.DeviceId.ToString();
@@ -268,7 +269,7 @@ namespace Joystick.ViewModels
                 await _mGattServer.Disconnect();
                 _mGattServer = null;
             }
-
+            ConnectionProgress = ConnectionProgress.Disconnected;
             Services.Clear();
             IsBusy = false;
         }

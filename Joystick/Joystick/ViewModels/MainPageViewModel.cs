@@ -116,6 +116,19 @@ namespace Joystick.ViewModels
             _timer.Start();
 
             Init();
+
+            if (_bluetoothManager.IsAdapterEnabled)
+            {
+                if (!_isFirstConnectToLastDevice &&
+                    !_bluetoothManager.IsConnectedOrConnecting &&
+                    !_bluetoothManager.IsScanning &&
+                    !string.IsNullOrWhiteSpace(_userSettings.LastBluetoothAddr))
+                {
+                    _isFirstConnectToLastDevice = true;
+                    _bluetoothManager.ConnectToLastDevice();
+                    return;
+                }
+            }
         }
         
         private void Init()
@@ -204,19 +217,6 @@ namespace Joystick.ViewModels
         {
             try
             {
-                if (_bluetoothManager.IsAdapterEnabled)
-                {
-                    if (!_isFirstConnectToLastDevice &&
-                        !_bluetoothManager.IsConnectedOrConnecting &&
-                        !_bluetoothManager.IsScanning &&
-                        !string.IsNullOrWhiteSpace(_userSettings.LastBluetoothAddr))
-                    {
-                        _isFirstConnectToLastDevice = true;
-                        _bluetoothManager.ConnectToLastDevice();
-                        return;
-                    }
-                }
-                
                 if (_bluetoothManager.IsBusy || _bluetoothManager.ConnectionProgress != ConnectionProgress.Connected)
                 {
                     return;
@@ -227,9 +227,23 @@ namespace Joystick.ViewModels
                     return;
                 }
 
-                var characteristic = _bluetoothManager.Services[0].Characteristic[0];
+                BleGattCharacteristicViewModel characteristic = null;
 
-                if (!characteristic.CanWrite)
+                foreach (var service in _bluetoothManager.Services)
+                {
+                    foreach (var characteristicViewModel in service.Characteristic)
+                    {
+                        if (characteristicViewModel.CanNotify &&
+                            characteristicViewModel.CanRead &&
+                            characteristicViewModel.CanWrite)
+                        {
+                            characteristic = characteristicViewModel;
+                            break;
+                        }
+                    }
+                }
+                
+                if (characteristic == null)
                 {
                     return;
                 }
